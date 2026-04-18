@@ -3,6 +3,42 @@
 # -----------------------------
 # TREND DATA (market trends)
 # -----------------------------
+# THIS IS TEMPORARY AND NOT TRUE DATA! WE INTEND TO CHANGE THIS LATER
+'''
+THIS DATA REPRESENTS A DICTIONARY ABOUT THE DIFFERENT TRENDS NOWADAYS AND WHAT POP HAS IN THEIR INVENTORY. WE WANT TO SEE 
+HOW MUCH POP'S PRODUCTS MATCH THESE TRENDS.
+'''
+
+'''
+## 📊 sample_data.py — Mock Data Layer
+
+### Purpose:
+Provides **initial data to simulate real-world inputs**
+
+### Contains:
+
+### 1. Trend Data:
+Each trend should include:
+- name
+- category (sweet/salty)
+- growth values (time series)
+- description
+
+### 2. POP Product Catalog:
+Each product should include:
+- name
+- category
+- flavor profile (sweet, spicy, herbal, etc.)
+- tags (ginger, matcha, etc.)
+
+### Why it matters:
+This simulates:
+- “what the market is doing” (trends)
+- “what POP already has” (products)
+
+This is essential for **gap detection**.
+
+'''
 
 TRENDS = [
     {
