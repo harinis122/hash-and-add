@@ -6,8 +6,8 @@
 
 TRENDS = [
     {
-        "name": "Sweet + Salty Protein Snacks",
-        "category": "sweet",
+        "name": "Salty Protein Snacks",
+        "category": "salty",
         "growth": [10, 20, 35, 50, 70],
         "description": "High-protein snacks combining sweet and salty flavors (e.g., chocolate + sea salt)",
         "risk": "Medium",
@@ -22,7 +22,7 @@ TRENDS = [
         "tags": ["low sugar", "functional", "wellness"]
     },
     {
-        "name": "Spicy + Sweet Snacks",
+        "name": "Sugary Snacks",
         "category": "sweet",
         "growth": [5, 15, 30, 50, 75],
         "description": "Flavor combos like chili mango or spicy honey snacks",
