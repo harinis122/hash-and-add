@@ -35,7 +35,8 @@ P = dict(
 )
 
 PERIODS = ["Q1", "Q2", "Q3", "Q4", "Q5"]
-PAGE_GUTTER = "2rem"
+PAGE_GUTTER = "clamp(1.25rem, 3vw, 2.75rem)"
+CONTENT_MAX_WIDTH = "1320px"
 
 RANKING_META = {
     "score": {"label": "Overall Score", "field": "final_score", "unit": "/ 100", "color": P["pop"]},
@@ -227,7 +228,7 @@ def _inject_css():
   --pop:{P["pop"]};--pop-dark:{P["pop_dark"]};--pop-light:{P["pop_light"]};
   --pop-xlight:{P["pop_xlight"]};--pop-xxlight:{P["pop_xxlight"]};
   --ink:{P["ink"]};--muted:{P["muted"]};--line:{P["line"]};
-  --bg:{P["bg"]};
+  --bg:{P["bg"]};--content-max:{CONTENT_MAX_WIDTH};
   --sweet-dark:{P["sweet_dark"]};--sweet-bg:{P["sweet_bg"]};
   --salty-dark:{P["salty_dark"]};--salty-bg:{P["salty_bg"]};
   --good:{P["good"]};--warn:{P["warn"]};--danger:{P["danger"]};
@@ -240,7 +241,11 @@ html,body,.stApp {{
 }}
 
 #MainMenu,footer,header {{visibility:hidden;}}
-.block-container {{ padding:0 !important; max-width:100% !important; }}
+.block-container {{
+  padding:0 {PAGE_GUTTER} 2.25rem !important;
+  max-width:var(--content-max) !important;
+  margin:0 auto !important;
+}}
 section[data-testid="stSidebar"] {{display:none;}}
 
 div[data-testid="stButton"] > button {{
