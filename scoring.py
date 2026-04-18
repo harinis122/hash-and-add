@@ -33,9 +33,9 @@ from gap_analysis import analyze_all_gaps, analyze_sample_gaps
 from sample_data import TRENDS
 
 
-MAX_TREND_STRENGTH = 25
+MAX_TREND_STRENGTH = 30
 MAX_FEASIBILITY_COMPONENT = 25
-MAX_SATURATION_PENALTY = 20
+MAX_SATURATION_PENALTY = 30
 
 TIME_TO_MARKET_RISK_PENALTY = {
     "Low": 0,
@@ -50,9 +50,9 @@ TIMING_STAGE_PENALTY = {
 }
 
 POP_PRESENCE_PENALTY = {
-    "LOW": 0,
-    "MEDIUM": 3,
-    "HIGH": 7,
+    "LOW": 6,
+    "MEDIUM": 2,
+    "HIGH": 1,
 }
 
 
@@ -82,18 +82,36 @@ def calculate_trend_strength_score(trend: Dict) -> int:
         )
     )
 
-    strength = (latest_value * 0.18) + (average_value * 0.08) + (recent_change * 0.45)
+    momentum_ratio = float(trend.get("trend_momentum", {}).get("momentum_ratio", 1.0))
+
+    strength = (
+        (latest_value * 0.18)
+        + (average_value * 0.10)
+        + (recent_change * 0.55)
+        + (momentum_ratio * 3.0)
+    )
     return _clamp(strength, 0, MAX_TREND_STRENGTH)
 
 
 def calculate_trend_momentum_score(trend: Dict) -> int:
     """
-    Reuse the forecast timing advantage as the momentum component.
+    Convert timing into a more granular momentum component.
 
-    This keeps the score aligned with POP's most important constraint:
-    early timing is strategically more valuable than peak popularity.
+    The forecast layer gives useful buckets like EARLY/MID/LATE, but for
+    scoring we also want finer separation using time-to-peak and risk.
     """
-    return _clamp(float(trend.get("timing_advantage_score", 0)), 0, 30)
+    stage_score = float(trend.get("timing_advantage_score", 0))
+    time_to_peak = float(trend.get("time_to_peak_periods", 0))
+    risk = str(trend.get("time_to_market_risk", "Medium")).title()
+
+    runway_bonus = min(6.0, time_to_peak * 1.2)
+    risk_penalty = {
+        "Low": 0.0,
+        "Medium": 2.0,
+        "High": 5.0,
+    }.get(risk, 2.0)
+
+    return _clamp(stage_score + runway_bonus - risk_penalty, 0, 30)
 
 
 def calculate_feasibility_component(trend: Dict) -> int:
@@ -114,17 +132,33 @@ def calculate_saturation_penalty(trend: Dict) -> int:
     The penalty increases when:
     - the trend is late-cycle
     - time-to-market risk is high
-    - POP already has high presence, meaning the whitespace is smaller
+    - POP has low adjacency, meaning POP would need to branch out
     - the opportunity is not feasible
     """
     timing_stage = str(trend.get("timing_stage", "")).upper()
     time_to_market_risk = str(trend.get("time_to_market_risk", "")).title()
     pop_presence = str(trend.get("pop_presence", "")).upper()
+    branch_out_worthy = bool(trend.get("branch_out_worthy", False))
+    extension_friendly = bool(trend.get("extension_friendly", False))
+    match_count = int(trend.get("pop_match_count", 0))
 
     penalty = 0
     penalty += TIMING_STAGE_PENALTY.get(timing_stage, 4)
     penalty += TIME_TO_MARKET_RISK_PENALTY.get(time_to_market_risk, 4)
     penalty += POP_PRESENCE_PENALTY.get(pop_presence, 3)
+
+    if pop_presence == "LOW" and extension_friendly:
+        penalty += 2
+    elif pop_presence == "LOW" and not branch_out_worthy:
+        penalty += 7
+    elif pop_presence == "LOW" and branch_out_worthy:
+        penalty += 1
+
+    if match_count == 0 and not extension_friendly:
+        penalty += 3
+
+    if str(trend.get("recommended_action", "")).lower() == "deprioritize":
+        penalty += 4
 
     if not trend.get("is_feasible", False):
         penalty += 5
@@ -134,11 +168,13 @@ def calculate_saturation_penalty(trend: Dict) -> int:
 
 def determine_opportunity_level(final_score: int, recommended_action: str) -> str:
     """Map the final score to a simple stakeholder-friendly label."""
-    if recommended_action == "deprioritize":
-        return "Low"
-    if final_score >= 60:
+    if final_score >= 70:
         return "High"
-    if final_score >= 40:
+    if final_score >= 45:
+        return "Medium"
+    if recommended_action == "deprioritize" and final_score < 45:
+        return "Low"
+    if final_score >= 30:
         return "Medium"
     return "Low"
 
@@ -155,15 +191,27 @@ def build_scoring_reasoning(
     recommended_action = trend.get("recommended_action", "develop")
     timing_stage = str(trend.get("timing_stage", "")).lower()
     pop_presence = str(trend.get("pop_presence", "")).lower()
+    branch_out_worthy = bool(trend.get("branch_out_worthy", False))
+    extension_friendly = bool(trend.get("extension_friendly", False))
+
+    if pop_presence == "low" and not branch_out_worthy:
+        if extension_friendly:
+            adjacency_line = "The score is still penalized for low direct overlap, but this looks more like a realistic reformulation or line extension than a true branch-out."
+        else:
+            adjacency_line = "The score is held back because POP has limited adjacency and this is not strong enough to justify branching out."
+    elif pop_presence == "low":
+        adjacency_line = "The score still carries branch-out risk, but the trend is strong enough to earn an exception."
+    else:
+        adjacency_line = "The score benefits from adjacency to POP's existing portfolio, which supports safer product tweaks."
 
     return (
         f"{trend.get('name', 'This trend')} scores {final_score}/100 for POP. "
         f"Trend strength contributes {trend_strength_score}, timing momentum contributes {trend_momentum_score}, "
-        f"feasibility contributes {feasibility_component}, and whitespace contributes "
+        f"feasibility contributes {feasibility_component}, and portfolio-fit opportunity contributes "
         f"{trend.get('gap_opportunity_score', 0)}. "
         f"A penalty of {saturation_penalty} is applied because the trend is {timing_stage}-stage "
         f"with {pop_presence} POP presence and {str(trend.get('time_to_market_risk', 'Medium')).lower()} "
-        f"time-to-market risk. The best move is to {recommended_action}."
+        f"time-to-market risk. {adjacency_line} The best move is to {recommended_action}."
     )
 
 
