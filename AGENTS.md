@@ -1,74 +1,225 @@
-# 🤖 AGENTS.md — Instructions for Codex
+# 🤖 AGENTS.md — Codex Operating Guide
 
-## 📌 Project Context
+## 📌 Project Identity
 
-This project is a **hackathon prototype** for a snack strategy tool called:
+This project is a **hackathon prototype** for:
 
 > **POP Snack Strategy Engine (Flavor Gap Detector)**
 
-The goal is NOT to build a generic trend dashboard.
+This is NOT a generic data science project.
 
-The goal is to build:
+This is a **business decision tool** that simulates how a real company decides:
 
-> **A system that recommends what snack products POP should launch or distribute next**
-
----
-
-## 🎯 Core Problem
-
-The system must:
-
-1. Identify **emerging snack trends**
-2. Evaluate **whether POP can execute them**
-3. Detect **gaps in POP’s current product lineup**
-4. Output **clear business recommendations**
+> “What products should we launch or distribute next?”
 
 ---
 
-## 🍬 Scope (IMPORTANT)
+## 🏢 About POP (Prince of Peace / Prince of Price)
 
-Only focus on:
+POP is a company that:
+
+- imports and distributes **Asian food and wellness products**
+- focuses on **herbal, natural, and functional consumables**
+- sells through **retail + wholesale channels**
+- prioritizes **accessible, mass-market products**
+
+### Example product categories:
+- ginger chews
+- herbal teas
+- wellness snacks
+- shelf-stable packaged goods
+
+---
+
+## 🎯 POP’s Core Mission
+
+POP aims to:
+
+- bring **Asian-inspired wellness products** to global markets
+- offer **affordable, accessible health-oriented foods**
+- balance **traditional herbal ingredients** with **modern trends**
+
+---
+
+## ⚠️ CRITICAL BUSINESS CHALLENGE (VERY IMPORTANT)
+
+POP’s biggest weakness is NOT lack of ideas.
+
+It is:
+
+> **SLOW EXECUTION due to regulatory and operational constraints**
+
+### Why POP is slow:
+
+- strict compliance with **FDA regulations**
+- conservative product approval processes
+- supply chain complexity (importing, manufacturing, labeling)
+- longer product development timelines
+
+---
+
+## 🚨 Strategic Implication (CORE INSIGHT)
+
+Because POP is slow to act:
+
+> **They must detect trends EARLIER than competitors**
+
+If they identify trends too late:
+- competitors launch first
+- market becomes saturated
+- opportunity is lost
+
+---
+
+## 🎯 What This System Must Do Differently
+
+This system is NOT just finding trends.
+
+It must:
+
+> **Prioritize EARLY-STAGE trends with future growth potential**
+
+NOT just currently popular ones.
+
+---
+
+## 🧠 Updated Decision Logic (CRITICAL)
+
+Every trend must be evaluated on:
+
+1. **Trend Strength (Current Popularity)**
+2. **Trend Momentum (How early vs saturated)**
+3. **POP Presence**
+4. **Feasibility**
+5. **Time-to-Market Risk**
+
+---
+
+### New Concept: Timing Advantage Score
+
+Each trend should include:
+
+- EARLY → high strategic value  
+- PEAK → medium value  
+- SATURATED → low value  
+
+---
+
+### Updated Final Score
+
+Final Score =  
+Trend Strength  
++ Trend Momentum (early-stage bonus)  
++ Feasibility Score  
++ Gap Opportunity Score  
+− Saturation Penalty  
+
+---
+
+## ⏱️ Time-to-Market Awareness
+
+The system must consider:
+
+> “Can POP realistically act on this BEFORE the trend peaks?”
+
+If NOT:
+- deprioritize the trend
+
+---
+
+## 🍬 Scope of This Project
+
+ONLY focus on:
 
 - Sweet snacks
 - Salty snacks
 
-Do NOT expand into unrelated food categories.
-
-All logic should assume:
-- shelf-stable products
-- packaged snack goods
-- easy distribution
+These are:
+- shelf-stable
+- scalable
+- aligned with POP’s capabilities
 
 ---
 
-## 💡 Core Concept: Flavor Gap Detection
+## 🔥 Core Idea: Flavor Gap Detection
 
-This is the defining feature of the project.
+The system must detect:
 
-The system must compare:
+> **Where trends exist but POP has no strong presence**
 
-- **What is trending**
-vs
-- **What POP already sells**
+Combined with:
 
-And identify:
-
-> **Where POP is missing opportunities**
+> **Whether it is early enough to act**
 
 ---
 
-## 🧠 Required Output Behavior
+## 🧩 Build vs Distribute Logic
 
-For each trend, the system should ultimately provide:
+### DISTRIBUTE if:
+- trend is already accelerating quickly
+- time-to-market is critical
+- existing products can be sourced fast
 
-- Trend description
-- Trend strength (score or label)
-- POP presence (LOW / MEDIUM / HIGH)
-- Risk level
-- Recommendation:
-  - Build a new product
-  - Distribute an existing one
-- Explanation (why this is a good opportunity)
+### DEVELOP if:
+- trend is early-stage
+- POP has ingredient advantage (e.g., ginger, herbal)
+- enough time exists before peak
+
+---
+
+## 🧪 Example Thinking
+
+### Trend: Collagen Snacks
+
+- growing but early-stage
+- moderate feasibility
+- POP presence: LOW
+
+👉 GOOD opportunity (early + gap)
+
+---
+
+### Trend: Protein Bars
+
+- highly saturated
+- many competitors
+- complex manufacturing
+
+👉 BAD opportunity (too late)
+
+---
+
+### Trend: Spicy + Sweet Snacks
+
+- rising quickly
+- strong flavor alignment with POP
+- feasible ingredients
+
+👉 HIGH priority
+
+---
+
+## 🚧 Real-World Constraints (CRITICAL)
+
+All recommendations MUST respect:
+
+### 1. Shelf Stability
+- must last months without refrigeration
+
+### 2. Scalability
+- must be mass-producible
+
+### 3. Cost Sensitivity
+- affordable ingredients only
+
+### 4. Supply Chain Reality
+- long shipping times
+- import logistics
+
+### 5. FDA Compliance
+- approved food ingredients
+- proper labeling
+- no medical claims
 
 ---
 
@@ -76,42 +227,20 @@ For each trend, the system should ultimately provide:
 
 Code MUST be modular.
 
-### Files and responsibilities:
-
-- `app.py`
-  - Streamlit UI only
-  - No heavy logic
-
-- `sample_data.py`
-  - mock trends
-  - mock POP product catalog
-
-- `scoring.py`
-  - trend scoring
-  - feasibility scoring
-
-- `gap_analysis.py`
-  - compares trends vs POP products
-  - calculates "POP presence"
-
-- `constraints.py`
-  - rules like shelf stability, cost, etc.
+- `app.py` → UI only  
+- `sample_data.py` → mock data  
+- `scoring.py` → scoring logic  
+- `gap_analysis.py` → POP vs trend comparison  
+- `constraints.py` → feasibility rules  
 
 ---
 
 ## ⚙️ Development Philosophy
 
-### 1. Start simple
-- Always build the simplest working version first
-
-### 2. Use mock data
-- Do NOT require real datasets initially
-
-### 3. Prioritize UI over intelligence
-- A working demo is more important than perfect logic
-
-### 4. Keep everything replaceable
-- Logic should be easy to swap with real models later
+- prioritize working UI
+- use mock data first
+- keep logic simple
+- make reasoning visible
 
 ---
 
@@ -119,86 +248,40 @@ Code MUST be modular.
 
 Do NOT:
 
-- implement complex ML models early
-- add unnecessary frameworks
-- tightly couple UI and logic
-- over-engineer data pipelines
-- fetch external APIs unless explicitly required
-
----
-
-## 🧪 Expected Build Order
-
-When adding features, follow this order:
-
-1. UI skeleton (Streamlit)
-2. Mock data integration
-3. Trend ranking display
-4. Clickable detail view
-5. Scoring functions
-6. Gap detection logic
-7. Improved explanations
-
----
-
-## 🧩 Data Design Expectations
-
-Mock data should include:
-
-### Trends:
-- name
-- category (sweet/salty)
-- growth values (list or time series)
-- description
-
-### POP Products:
-- product name
-- flavor profile
-- category
-- tags (e.g., ginger, herbal, sweet, spicy)
-
----
-
-## 🧠 Decision Logic (IMPORTANT)
-
-All recommendations must come from:
-
-Trend Score  
-+ Feasibility Score  
-+ Gap Opportunity  
-
-NOT from random or hardcoded rankings.
+- ignore time-to-market
+- recommend saturated trends
+- suggest unrealistic products
+- overcomplicate models
 
 ---
 
 ## 🏁 Success Criteria
 
-A successful implementation must:
+A successful system must:
 
-- run locally with `streamlit run app.py`
-- display ranked snack opportunities
-- allow users to explore trends
-- clearly show reasoning behind recommendations
-- demonstrate gap detection
+- highlight early-stage opportunities
+- reflect POP’s slow execution constraint
+- prioritize trends with enough lead time
+- clearly explain WHY a trend is actionable
 
 ---
 
 ## 🧭 Guiding Principle
 
-Always optimize for:
+Always think like:
 
-> **Clarity, simplicity, and demo-ability**
+> **A strategist at POP who must act early because the company is slow to execute**
 
-This is a hackathon project, not a production system.
+NOT:
+
+> Someone reacting to already-popular trends
 
 ---
 
-## 🔥 Final Reminder
+## 🔥 Final Rule
 
 If unsure:
 
-- make it simpler
-- make it runnable
-- make it explainable
-
-DO NOT make it more complex.
+- prefer earlier trends over bigger trends  
+- prefer realistic over perfect  
+- prefer explainable over complex 
