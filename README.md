@@ -87,6 +87,11 @@ Then we output:
 
 > **What POP should do next**
 
+
+### System Design: Mermaid Diagram
+![alt text](image.png)
+
+
 ---
 
 ### Example Output
@@ -177,3 +182,4 @@ On click, show:
 - Time series forecasting
 - NLP trend extraction
 - Real sales + market datasets
+
