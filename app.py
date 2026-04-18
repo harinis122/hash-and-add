@@ -58,9 +58,9 @@ GLOBAL_Y_MIN = 0
 GLOBAL_Y_MAX = None
 
 
-@st.cache_data
+@st.cache_data(ttl=3600)
 def load_trends() -> List[Dict]:
-    return score_sample_trends()
+    return score_sample_trends(pop_products=POP_PRODUCTS)
 
 
 def _compute_global_scale(trends: List[Dict]):

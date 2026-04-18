@@ -30,7 +30,7 @@ from statistics import mean
 from typing import Dict, List, Sequence
 
 from gap_analysis import analyze_all_gaps, analyze_sample_gaps
-from sample_data import TRENDS
+from sample_data import POP_PRODUCTS, TRENDS
 
 
 MAX_TREND_STRENGTH = 30
@@ -260,6 +260,7 @@ def score_trend(trend: Dict) -> Dict:
 
 def score_all_trends(
     trends: Sequence[Dict] | None = None,
+    pop_products: Sequence[Dict] | None = None,
     *,
     already_analyzed: bool = False,
 ) -> List[Dict]:
@@ -271,14 +272,20 @@ def score_all_trends(
     gap-analysis fields.
     """
     trends = list(trends or TRENDS)
-    analyzed_trends = trends if already_analyzed else analyze_all_gaps(trends)
+    pop_products = pop_products or POP_PRODUCTS
+    analyzed_trends = trends if already_analyzed else analyze_all_gaps(trends, pop_products=pop_products)
     scored = [score_trend(trend) for trend in analyzed_trends]
     return sorted(scored, key=lambda item: item["final_score"], reverse=True)
 
 
-def score_sample_trends() -> List[Dict]:
+def score_sample_trends(pop_products: Sequence[Dict] | None = None) -> List[Dict]:
     """Convenience helper for the mock POP prototype data."""
-    return score_all_trends(analyze_sample_gaps(), already_analyzed=True)
+    pop_products = pop_products or POP_PRODUCTS
+    return score_all_trends(
+        TRENDS,
+        pop_products=pop_products,
+        already_analyzed=False,
+    )
 
 
 __all__ = [
