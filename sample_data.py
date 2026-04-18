@@ -98,23 +98,113 @@ TRENDS = [
 
 POP_PRODUCTS = [
     {
-        "name": "Ginger Chews",
-        "category": "sweet",
-        "tags": ["ginger", "sweet", "functional", "asian"]
-    },
-    {
-        "name": "Herbal Tea",
-        "category": "sweet",
-        "tags": ["tea", "wellness", "functional"]
-    },
-    {
-        "name": "Honey Ginger Candy",
-        "category": "sweet",
-        "tags": ["ginger", "sweet", "natural"]
-    },
-    {
-        "name": "Seaweed Snacks",
-        "category": "salty",
-        "tags": ["seaweed", "salty", "umami", "asian"]
-    }
+    "name": "Ginger Chews - Original",
+    "category": "sweet",
+    "tags": ["ginger", "chewy", "candy", "asian"]
+},
+{
+    "name": "Ginger Chews - Lemon",
+    "category": "sweet",
+    "tags": ["ginger", "lemon", "chewy", "candy"]
+},
+{
+    "name": "Ginger Chews - Mango",
+    "category": "sweet",
+    "tags": ["ginger", "mango", "chewy", "candy"]
+},
+{
+    "name": "Ginger Chews - Lychee",
+    "category": "sweet",
+    "tags": ["ginger", "lychee", "chewy", "candy"]
+},
+{
+    "name": "Ginger Chews - Blood Orange",
+    "category": "sweet",
+    "tags": ["ginger", "citrus", "chewy", "candy"]
+},
+{
+    "name": "Ginger Chews - Pineapple Coconut",
+    "category": "sweet",
+    "tags": ["ginger", "tropical", "chewy", "candy"]
+},
+{
+    "name": "Ginger Honey Crystals - Original",
+    "category": "sweet",
+    "tags": ["ginger", "honey", "drink", "functional"]
+},
+{
+    "name": "Ginger Honey Crystals - Lemon",
+    "category": "sweet",
+    "tags": ["ginger", "lemon", "drink", "functional"]
+},
+{
+    "name": "Ginger Honey Crystals - Turmeric",
+    "category": "sweet",
+    "tags": ["ginger", "turmeric", "functional", "wellness"]
+},
+{
+    "name": "Ginger Honey Crystals - Matcha",
+    "category": "sweet",
+    "tags": ["ginger", "matcha", "functional"]
+},
+{
+    "name": "Ginger Honey Crystals - Brown Sugar",
+    "category": "sweet",
+    "tags": ["ginger", "brown sugar", "sweet"]
+},
+{
+    "name": "Ginger Honey Crystals - Plum",
+    "category": "sweet",
+    "tags": ["ginger", "plum", "fruit"]
+}, 
+{
+    "name": "American Ginseng Root Candy",
+    "category": "sweet",
+    "tags": ["ginseng", "candy", "herbal", "functional"]
+},
+{
+    "name": "Honey Loquat Candy",
+    "category": "sweet",
+    "tags": ["honey", "loquat", "candy", "herbal"]
+},
+{
+    "name": "Herbal Jelly - Original",
+    "category": "sweet",
+    "tags": ["herbal", "jelly", "dessert", "asian"]
+},
+{
+    "name": "Herbal Jelly - Longan & Coconut",
+    "category": "sweet",
+    "tags": ["herbal", "fruit", "jelly", "dessert"]
+},
+{
+    "name": "Grass Jelly - Mango",
+    "category": "sweet",
+    "tags": ["jelly", "mango", "dessert"]
+},
+{
+    "name": "1mm Potato Crackers - BBQ",
+    "category": "salty",
+    "tags": ["potato", "crispy", "bbq", "snack"]
+},
+{
+    "name": "1mm Potato Crackers - Garlic",
+    "category": "salty",
+    "tags": ["potato", "crispy", "garlic"]
+},
+{
+    "name": "1mm Potato Crackers - Japanese Sauce",
+    "category": "salty",
+    "tags": ["potato", "crispy", "umami", "asian"]
+},
+{
+    "name": "1mm Potato Crackers - Wasabi Seaweed",
+    "category": "salty",
+    "tags": ["potato", "wasabi", "seaweed", "spicy"]
+},
+{
+    "name": "1mm Potato Crackers - Black Pepper",
+    "category": "salty",
+    "tags": ["potato", "pepper", "crispy"]
+}
 ]
