@@ -182,29 +182,4 @@ POP_PRODUCTS = [
     "category": "sweet",
     "tags": ["jelly", "mango", "dessert"]
 },
-{
-    "name": "1mm Potato Crackers - BBQ",
-    "category": "salty",
-    "tags": ["potato", "crispy", "bbq", "snack"]
-},
-{
-    "name": "1mm Potato Crackers - Garlic",
-    "category": "salty",
-    "tags": ["potato", "crispy", "garlic"]
-},
-{
-    "name": "1mm Potato Crackers - Japanese Sauce",
-    "category": "salty",
-    "tags": ["potato", "crispy", "umami", "asian"]
-},
-{
-    "name": "1mm Potato Crackers - Wasabi Seaweed",
-    "category": "salty",
-    "tags": ["potato", "wasabi", "seaweed", "spicy"]
-},
-{
-    "name": "1mm Potato Crackers - Black Pepper",
-    "category": "salty",
-    "tags": ["potato", "pepper", "crispy"]
-}
 ]
