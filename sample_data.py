@@ -4,6 +4,7 @@
 # TREND DATA (market trends)
 # -----------------------------
 # THIS IS TEMPORARY AND NOT TRUE DATA! WE INTEND TO CHANGE THIS LATER
+
 '''
 THIS DATA REPRESENTS A DICTIONARY ABOUT THE DIFFERENT TRENDS NOWADAYS AND WHAT POP HAS IN THEIR INVENTORY. WE WANT TO SEE 
 HOW MUCH POP'S PRODUCTS MATCH THESE TRENDS.
@@ -42,52 +43,116 @@ This is essential for **gap detection**.
 
 TRENDS = [
     {
-        "name": "Salty Protein Snacks",
-        "category": "salty",
-        "growth": [10, 20, 35, 50, 70],
-        "description": "High-protein snacks combining sweet and salty flavors (e.g., chocolate + sea salt)",
-        "risk": "Medium",
-        "tags": ["protein", "sweet", "salty", "functional"]
-    },
-    {
-        "name": "Low Sugar Functional Snacks",
+        "name": "Matcha Snacks",
         "category": "sweet",
-        "growth": [15, 25, 40, 55, 65],
-        "description": "Snacks with reduced sugar and added health benefits",
+        "growth": [24, 31, 42, 57, 69],
+        "description": "Google Trends-inspired interest around matcha is spilling into sweet packaged snacks like wafers, cookies, and filled bites.",
         "risk": "Low",
-        "tags": ["low sugar", "functional", "wellness"]
+        "tags": ["matcha", "sweet", "asian", "wellness"]
     },
     {
-        "name": "Sugary Snacks",
+        "name": "Seaweed Snacks",
+        "category": "salty",
+        "growth": [20, 28, 39, 53, 67],
+        "description": "Google Trends-style demand signal around seaweed points to salty, shelf-stable, umami-forward snack formats with strong Asian flavor relevance.",
+        "risk": "Low",
+        "tags": ["seaweed", "umami", "salty", "asian"]
+    },
+    {
+        "name": "Low Sugar Snacks",
         "category": "sweet",
-        "growth": [5, 15, 30, 50, 75],
-        "description": "Flavor combos like chili mango or spicy honey snacks",
+        "growth": [18, 25, 36, 49, 63],
+        "description": "Search interest in lower-sugar snacking continues to rise, especially for better-for-you sweet snacks with wellness positioning.",
         "risk": "Medium",
-        "tags": ["spicy", "sweet", "flavor fusion"]
+        "tags": ["low sugar", "functional", "sweet", "wellness"]
     },
     {
-        "name": "Savory Umami Snacks",
+        "name": "Rice Cracker Snacks",
         "category": "salty",
-        "growth": [20, 30, 45, 60, 80],
-        "description": "Umami-rich snacks like seaweed, mushroom crisps",
+        "growth": [16, 23, 34, 46, 58],
+        "description": "Crunchy rice-based snacks remain relevant as a shelf-stable, Asian-adjacent format with room for flavor innovation.",
         "risk": "Low",
-        "tags": ["umami", "savory", "asian"]
+        "tags": ["rice", "salty", "asian", "crispy"]
     },
     {
-        "name": "High-Protein Salty Snacks",
+        "name": "Mushroom Umami Snacks",
         "category": "salty",
-        "growth": [10, 20, 40, 55, 70],
-        "description": "Protein-focused salty snacks like chickpea chips",
+        "growth": [12, 19, 31, 44, 60],
+        "description": "Mushroom-led snack concepts are gaining attention for earthy flavor, umami depth, and functional positioning.",
         "risk": "Medium",
-        "tags": ["protein", "salty", "functional"]
+        "tags": ["mushroom", "umami", "functional", "salty"]
     },
     {
-        "name": "Fermented / Gut Health Snacks",
+        "name": "Ginger Wellness Candy",
+        "category": "sweet",
+        "growth": [22, 29, 37, 47, 59],
+        "description": "Ginger-forward sweets continue to benefit from wellness-oriented search interest and POP's existing ingredient strength.",
+        "risk": "Low",
+        "tags": ["ginger", "sweet", "functional", "asian"]
+    },
+    {
+        "name": "Spicy Sweet Fruit Snacks",
+        "category": "sweet",
+        "growth": [14, 22, 33, 48, 64],
+        "description": "Spicy-sweet fruit flavors are showing stronger consumer interest in snackable formats with bold flavor fusion.",
+        "risk": "Medium",
+        "tags": ["spicy", "sweet", "fruit", "flavor fusion"]
+    },
+    {
+        "name": "Protein Crisps",
         "category": "salty",
-        "growth": [8, 18, 30, 50, 65],
-        "description": "Snacks supporting gut health like kimchi chips or probiotic bites",
+        "growth": [19, 28, 40, 55, 71],
+        "description": "High-protein crunchy snacks continue rising as consumers look for more functional savory snacking options.",
+        "risk": "Medium",
+        "tags": ["protein", "salty", "functional", "crispy"]
+    },
+    {
+        "name": "Honey Citrus Candy",
+        "category": "sweet",
+        "growth": [17, 24, 33, 43, 54],
+        "description": "Honey and citrus flavor combinations remain attractive in approachable confections with herbal or soothing cues.",
+        "risk": "Low",
+        "tags": ["honey", "citrus", "sweet", "herbal"]
+    },
+    {
+        "name": "Wasabi Seaweed Snacks",
+        "category": "salty",
+        "growth": [15, 21, 32, 45, 61],
+        "description": "Wasabi and seaweed together suggest a strong Asian savory snack opportunity with clear POP adjacency.",
+        "risk": "Low",
+        "tags": ["wasabi", "seaweed", "spicy", "asian"]
+    },
+    {
+        "name": "Lychee Fruit Candy",
+        "category": "sweet",
+        "growth": [13, 20, 29, 41, 56],
+        "description": "Lychee remains a distinctive Asian fruit flavor with growing appeal in novelty candy and snack formats.",
+        "risk": "Low",
+        "tags": ["lychee", "fruit", "sweet", "asian"]
+    },
+    {
+        "name": "Turmeric Functional Snacks",
+        "category": "sweet",
+        "growth": [11, 18, 27, 39, 52],
+        "description": "Turmeric continues to show wellness-driven interest and could translate into approachable sweet functional snack extensions.",
+        "risk": "Medium",
+        "tags": ["turmeric", "functional", "wellness", "sweet"]
+    },
+    {
+        "name": "Fermented Flavor Snacks",
+        "category": "salty",
+        "growth": [9, 15, 24, 37, 49],
+        "description": "Fermented flavor profiles like kimchi and pickled spice are attracting curiosity in shelf-stable savory snacks.",
         "risk": "High",
-        "tags": ["gut health", "fermented", "functional"]
+        "tags": ["fermented", "salty", "asian", "functional"]
+    },
+    {
+        "name": "Herbal Dessert Snacks",
+        "category": "sweet",
+        "growth": [10, 16, 25, 36, 50],
+        "description": "Herbal dessert-style snacks reflect growing interest in Asian-inspired sweet products with familiar wellness cues.",
+        "risk": "Medium",
+        "tags": ["herbal", "sweet", "dessert", "asian"]
     }
 ]
 
