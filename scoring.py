@@ -26,16 +26,19 @@ ranked list that reflects POP's real-world constraints:
 
 from __future__ import annotations
 
-from statistics import mean
 from typing import Dict, List, Sequence
 
 from gap_analysis import analyze_all_gaps, analyze_sample_gaps
 from sample_data import POP_PRODUCTS, TRENDS
 
 
-MAX_TREND_STRENGTH = 30
-MAX_FEASIBILITY_COMPONENT = 25
-MAX_GAP_COMPONENT = 25
+FINAL_SCORE_WEIGHTS = {
+    "trend_strength": 0.30,
+    "trend_momentum": 0.30,
+    "feasibility": 0.20,
+    "gap_opportunity": 0.20,
+}
+
 MAX_SATURATION_PENALTY = 30
 
 TIME_TO_MARKET_RISK_PENALTY = {
@@ -63,76 +66,93 @@ def _clamp(value: float, minimum: int, maximum: int) -> int:
 
 def calculate_trend_strength_score(trend: Dict) -> int:
     """
-    Score current demand strength from the growth curve.
+    Score current demand strength from the growth curve on a 0-100 scale.
 
-    This is the "how strong is this trend right now?" component. We reward:
-    - strong latest demand
-    - solid average demand across the series
-    - healthy recent acceleration
+    This is the "how strong is this trend right now?" component. The score
+    favors current demand, then uses average demand and recent movement as
+    supporting signals. A trend can be promising without being maxed out.
     """
     growth = [float(value) for value in trend.get("growth", [])]
     if not growth:
         return 0
 
     latest_value = float(trend.get("trend_momentum", {}).get("latest_value", growth[-1]))
-    average_value = float(trend.get("trend_momentum", {}).get("average_value", mean(growth)))
+    average_value = float(
+        trend.get("trend_momentum", {}).get("average_value", sum(growth) / len(growth))
+    )
     recent_change = float(
         trend.get("trend_momentum", {}).get(
             "recent_change",
             growth[-1] - growth[-2] if len(growth) >= 2 else 0.0,
         )
     )
-
     momentum_ratio = float(trend.get("trend_momentum", {}).get("momentum_ratio", 1.0))
 
+    recent_growth_score = min(max(recent_change * 5.0, 0.0), 100.0)
+    acceleration_score = min(max(50.0 + ((momentum_ratio - 1.0) * 50.0), 0.0), 100.0)
+
     strength = (
-        (latest_value * 0.18)
-        + (average_value * 0.10)
-        + (recent_change * 0.55)
-        + (momentum_ratio * 3.0)
+        (latest_value * 0.45)
+        + (average_value * 0.25)
+        + (recent_growth_score * 0.20)
+        + (acceleration_score * 0.10)
     )
-    return _clamp(strength, 0, MAX_TREND_STRENGTH)
+    return _clamp(strength, 0, 100)
 
 
 def calculate_trend_momentum_score(trend: Dict) -> int:
     """
-    Convert timing into a more granular momentum component.
+    Convert timing into a 0-100 strategic momentum score.
 
-    The forecast layer gives useful buckets like EARLY/MID/LATE, but for
-    scoring we also want finer separation using time-to-peak and risk.
+    This is not just popularity. It rewards acceleration, runway before the
+    trend peaks, and POP's ability to act before the window closes.
     """
-    stage_score = float(trend.get("timing_advantage_score", 0))
+    timing_stage = str(trend.get("timing_stage", "")).upper()
     time_to_peak = float(trend.get("time_to_peak_periods", 0))
     risk = str(trend.get("time_to_market_risk", "Medium")).title()
+    momentum_ratio = float(trend.get("trend_momentum", {}).get("momentum_ratio", 1.0))
 
-    runway_bonus = min(6.0, time_to_peak * 1.2)
-    risk_penalty = {
-        "Low": 0.0,
-        "Medium": 2.0,
-        "High": 5.0,
-    }.get(risk, 2.0)
+    stage_score = {
+        "EARLY": 88.0,
+        "MID": 68.0,
+        "LATE": 35.0,
+    }.get(timing_stage, 55.0)
+    acceleration_score = min(max(50.0 + ((momentum_ratio - 1.0) * 50.0), 0.0), 100.0)
+    runway_score = min(max((time_to_peak / 6.0) * 100.0, 0.0), 100.0)
+    risk_score = {
+        "Low": 90.0,
+        "Medium": 65.0,
+        "High": 35.0,
+    }.get(risk, 65.0)
 
-    return _clamp(stage_score + runway_bonus - risk_penalty, 0, 30)
+    momentum = (
+        (stage_score * 0.45)
+        + (acceleration_score * 0.25)
+        + (runway_score * 0.20)
+        + (risk_score * 0.10)
+    )
+    return _clamp(momentum, 0, 100)
 
 
 def calculate_feasibility_component(trend: Dict) -> int:
     """
-    Normalize the 0-100 feasibility score into a 0-25 scoring component.
-
-    The raw feasibility score is still preserved on the output, but the final
-    opportunity score needs balanced components so one field does not dominate.
+    Return the raw 0-100 feasibility score for weighted final scoring.
     """
     feasibility_score = float(trend.get("feasibility_score", 0))
-    return _clamp((feasibility_score / 100) * MAX_FEASIBILITY_COMPONENT, 0, MAX_FEASIBILITY_COMPONENT)
+    return _clamp(feasibility_score, 0, 100)
 
 
 def calculate_gap_component(trend: Dict) -> int:
     """
-    Normalize the 0-100 portfolio gap opportunity score into a 0-25
-    contribution for the final ranking.
+    Return the raw 0-100 portfolio gap opportunity score for weighted scoring.
     """
     gap_opportunity_score = float(trend.get("gap_opportunity_score", 0))
-    return _clamp((gap_opportunity_score / 100) * MAX_GAP_COMPONENT, 0, MAX_GAP_COMPONENT)
+    return _clamp(gap_opportunity_score, 0, 100)
+
+
+def calculate_weighted_contribution(score: int, weight: float) -> int:
+    """Convert a 0-100 score into its weighted final-score contribution."""
+    return _clamp(float(score) * weight, 0, 100)
 
 
 def calculate_saturation_penalty(trend: Dict) -> int:
@@ -217,9 +237,9 @@ def build_scoring_reasoning(
 
     return (
         f"{trend.get('name', 'This trend')} scores {final_score}/100 for POP. "
-        f"Trend strength contributes {trend_strength_score}, timing momentum contributes {trend_momentum_score}, "
-        f"feasibility contributes {feasibility_component}, and portfolio-fit opportunity contributes "
-        f"{gap_component} from a {trend.get('gap_opportunity_score', 0)}/100 gap score. "
+        f"The weighted average uses trend strength at {trend_strength_score}/100, "
+        f"timing momentum at {trend_momentum_score}/100, feasibility at {feasibility_component}/100, "
+        f"and portfolio-fit opportunity at {gap_component}/100. "
         f"A penalty of {saturation_penalty} is applied because the trend is {timing_stage}-stage "
         f"with {pop_presence} POP presence and {str(trend.get('time_to_market_risk', 'Medium')).lower()} "
         f"time-to-market risk. {adjacency_line} The best move is to {recommended_action}."
@@ -239,12 +259,25 @@ def score_trend(trend: Dict) -> Dict:
     gap_component = calculate_gap_component(trend)
     saturation_penalty = calculate_saturation_penalty(trend)
 
-    base_score = (
-        trend_strength_score
-        + trend_momentum_score
-        + feasibility_component
-        + gap_component
-    )
+    weighted_contributions = {
+        "trend_strength": calculate_weighted_contribution(
+            trend_strength_score,
+            FINAL_SCORE_WEIGHTS["trend_strength"],
+        ),
+        "trend_momentum": calculate_weighted_contribution(
+            trend_momentum_score,
+            FINAL_SCORE_WEIGHTS["trend_momentum"],
+        ),
+        "feasibility": calculate_weighted_contribution(
+            feasibility_component,
+            FINAL_SCORE_WEIGHTS["feasibility"],
+        ),
+        "gap_opportunity": calculate_weighted_contribution(
+            gap_component,
+            FINAL_SCORE_WEIGHTS["gap_opportunity"],
+        ),
+    }
+    base_score = sum(weighted_contributions.values())
     final_score = _clamp(base_score - saturation_penalty, 0, 100)
 
     recommended_action = str(trend.get("recommended_action", "develop")).lower()
@@ -256,6 +289,8 @@ def score_trend(trend: Dict) -> Dict:
         "trend_momentum_score": trend_momentum_score,
         "feasibility_component": feasibility_component,
         "gap_component_score": gap_component,
+        "weighted_score_before_penalty": base_score,
+        "weighted_score_contributions": weighted_contributions,
         "saturation_penalty": saturation_penalty,
         "final_score": final_score,
         "opportunity_level": opportunity_level,
@@ -308,7 +343,9 @@ __all__ = [
     "calculate_saturation_penalty",
     "calculate_trend_momentum_score",
     "calculate_trend_strength_score",
+    "calculate_weighted_contribution",
     "determine_opportunity_level",
+    "FINAL_SCORE_WEIGHTS",
     "score_all_trends",
     "score_sample_trends",
     "score_trend",
