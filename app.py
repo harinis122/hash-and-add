@@ -158,8 +158,7 @@ def _sorted_trends(trends, cat, sort_by):
     if sort_by == "momentum":
         return sorted(filtered, key=lambda t: t["trend_momentum_score"], reverse=True)
     if sort_by == "opportunity":
-        order = {"High": 0, "Medium": 1, "Low": 2}
-        return sorted(filtered, key=lambda t: order.get(t["opportunity_level"], 2))
+        return sorted(filtered, key=lambda t: t["gap_opportunity_score"], reverse=True)
     return filtered
 
 
@@ -641,24 +640,14 @@ def page_ranking(trends: List[Dict]):
     label = meta["label"]
     unit = meta["unit"]
 
-    if metric == "opportunity":
-        opp_order = {"High": 3, "Medium": 2, "Low": 1}
-        sorted_all = sorted(trends, key=lambda t: opp_order.get(t["opportunity_level"], 0), reverse=True)
+    sorted_all = sorted(trends, key=lambda t: float(t.get(field, 0)), reverse=True)
+    max_val = max((float(t.get(field, 0)) for t in sorted_all), default=1)
 
-        def _val(t):
-            return t["opportunity_level"]
+    def _val(t):
+        return t.get(field, 0)
 
-        def _bar_frac(t):
-            return opp_order.get(t["opportunity_level"], 0) / 3
-    else:
-        sorted_all = sorted(trends, key=lambda t: float(t.get(field, 0)), reverse=True)
-        max_val = max((float(t.get(field, 0)) for t in sorted_all), default=1)
-
-        def _val(t):
-            return t.get(field, 0)
-
-        def _bar_frac(t):
-            return float(t.get(field, 0)) / max(max_val, 1)
+    def _bar_frac(t):
+        return float(t.get(field, 0)) / max(max_val, 1)
 
     st.markdown(
         f"""
@@ -709,7 +698,7 @@ def page_ranking(trends: List[Dict]):
         sc_bg = _score_bg(sc)
         rank_color = P["pop"] if rank == 1 else (P["warn"] if rank == 2 else (P["good"] if rank == 3 else P["muted"]))
         bar_w = int(frac * 100)
-        val_display = f"{val} {unit}" if metric != "opportunity" else val
+        val_display = f"{val} {unit}"
 
         st.markdown(
             f"""

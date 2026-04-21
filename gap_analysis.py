@@ -61,11 +61,16 @@ RELATED_TAG_MAP = {
         "tea",
         "wellness",
     },
+    "protein": {
+        "functional",
+        "wellness",
+    },
 }
 
 EXTENSION_FRIENDLY_TAGS = {
     "asian",
     "chili",
+    "crispy",
     "ginger",
     "honey",
     "low sugar",
@@ -74,6 +79,15 @@ EXTENSION_FRIENDLY_TAGS = {
     "spicy",
     "tea",
     "umami",
+}
+
+SNACK_SCOPE_TAGS = {
+    "candy",
+    "chewy",
+    "crispy",
+    "dessert",
+    "fruit",
+    "jelly",
 }
 
 LOW_PRESENCE = "LOW"
@@ -86,16 +100,28 @@ PRESENCE_SCORES = {
     HIGH_PRESENCE: 28,
 }
 
-GAP_SCORES = {
-    LOW_PRESENCE: 18,
-    MEDIUM_PRESENCE: 10,
-    HIGH_PRESENCE: 3,
+GAP_BASE_SCORES = {
+    LOW_PRESENCE: 20,
+    MEDIUM_PRESENCE: 34,
+    HIGH_PRESENCE: 36,
 }
 
 ADJACENT_EXTENSION_SCORES = {
     LOW_PRESENCE: 4,
     MEDIUM_PRESENCE: 16,
-    HIGH_PRESENCE: 13,
+    HIGH_PRESENCE: 16,
+}
+
+TIMING_GAP_BONUS = {
+    "EARLY": 20,
+    "MID": 12,
+    "LATE": 0,
+}
+
+TIME_TO_MARKET_GAP_ADJUSTMENT = {
+    "Low": 8,
+    "Medium": 3,
+    "High": -8,
 }
 
 BRANCH_OUT_STRENGTH_THRESHOLD = 78
@@ -287,9 +313,12 @@ def calculate_gap_opportunity_score(trend: Dict, presence: Dict[str, object]) ->
     Score the portfolio opportunity for POP.
 
     Higher scores mean:
-    - the trend can be expressed as a safe extension of existing POP products
-    - POP has some adjacency to move faster
-    - true whitespace gets rewarded only when the upside is unusually high
+    - POP can extend from an existing product or ingredient base
+    - the trend is early enough for POP's slower execution cycle
+    - there is still some trend-specific room to modernize the portfolio
+
+    The returned score is 0-100 for UI display. The final scoring layer
+    normalizes it back into a smaller weighted component.
     """
     trend_tags = _specific_tags(trend.get("tags", []))
     whitespace_tags = set(presence.get("whitespace_tags", []))
@@ -299,29 +328,52 @@ def calculate_gap_opportunity_score(trend: Dict, presence: Dict[str, object]) ->
     soft_match_count = int(presence.get("soft_match_count", 0))
     branch_out_worthy = _is_branch_out_worthy(trend, presence)
     extension_friendly = _is_extension_friendly(trend, presence)
+    timing_stage = str(trend.get("timing_stage", "")).upper()
+    time_to_market_risk = str(trend.get("time_to_market_risk", "Medium")).title()
+    feasibility_score = float(trend.get("feasibility_score", 0))
+    tag_coverage = float(presence.get("tag_coverage_ratio", 0))
+    soft_tag_coverage = float(presence.get("soft_tag_coverage_ratio", 0))
+    in_snack_scope = str(trend.get("category", "")).lower() in {"sweet", "salty"}
+    format_fit_tags = trend_tags.intersection(SNACK_SCOPE_TAGS)
 
-    score = ADJACENT_EXTENSION_SCORES[pop_presence]
-    score += min(6, match_count * 2)
-    score += min(4, soft_match_count)
-    score += min(4, len(strategic_fit_tags) * 2)
-    score += int(round(float(presence.get("tag_coverage_ratio", 0)) * 4))
-    score += int(round(float(presence.get("soft_tag_coverage_ratio", 0)) * 3))
+    score = GAP_BASE_SCORES[pop_presence]
+    score += TIMING_GAP_BONUS.get(timing_stage, 8)
+    score += TIME_TO_MARKET_GAP_ADJUSTMENT.get(time_to_market_risk, 0)
+    score += ADJACENT_EXTENSION_SCORES[pop_presence]
+    score += min(8, len(strategic_fit_tags) * 4)
+    score += min(12, match_count * 2)
+    score += min(6, soft_match_count)
+    score += int(round(soft_tag_coverage * 8))
 
-    if str(trend.get("category", "")).lower() in {"sweet", "salty"}:
-        score += 2
+    if in_snack_scope:
+        score += 3
 
-    if whitespace_tags and match_count:
-        score += min(4, len(whitespace_tags))
+    if format_fit_tags:
+        score += min(8, len(format_fit_tags) * 4)
+
+    if whitespace_tags:
+        score += min(6, len(whitespace_tags) * 2)
 
     if pop_presence == LOW_PRESENCE:
-        score -= 8
         if extension_friendly:
-            score += 9
-        if branch_out_worthy:
-            score += GAP_SCORES[LOW_PRESENCE]
-            score += min(3, len(whitespace_tags))
+            score += 8
+        elif branch_out_worthy:
+            score += 6
+        elif in_snack_scope and format_fit_tags:
+            score -= 8
+        else:
+            score -= 24
 
-    return max(0, min(score, 25))
+    if match_count == 0 and soft_match_count == 0 and not format_fit_tags:
+        score -= 10
+
+    if feasibility_score:
+        score += int(round((feasibility_score - 65) / 5))
+
+    if timing_stage == "LATE":
+        score -= 18
+
+    return max(0, min(round(score), 100))
 
 
 def _determine_action(trend: Dict, presence: Dict[str, object], feasibility: Dict[str, object]) -> str:

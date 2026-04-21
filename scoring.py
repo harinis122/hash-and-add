@@ -35,6 +35,7 @@ from sample_data import POP_PRODUCTS, TRENDS
 
 MAX_TREND_STRENGTH = 30
 MAX_FEASIBILITY_COMPONENT = 25
+MAX_GAP_COMPONENT = 25
 MAX_SATURATION_PENALTY = 30
 
 TIME_TO_MARKET_RISK_PENALTY = {
@@ -125,6 +126,15 @@ def calculate_feasibility_component(trend: Dict) -> int:
     return _clamp((feasibility_score / 100) * MAX_FEASIBILITY_COMPONENT, 0, MAX_FEASIBILITY_COMPONENT)
 
 
+def calculate_gap_component(trend: Dict) -> int:
+    """
+    Normalize the 0-100 portfolio gap opportunity score into a 0-25
+    contribution for the final ranking.
+    """
+    gap_opportunity_score = float(trend.get("gap_opportunity_score", 0))
+    return _clamp((gap_opportunity_score / 100) * MAX_GAP_COMPONENT, 0, MAX_GAP_COMPONENT)
+
+
 def calculate_saturation_penalty(trend: Dict) -> int:
     """
     Penalize trends that are harder for POP to capture in time.
@@ -184,6 +194,7 @@ def build_scoring_reasoning(
     trend_strength_score: int,
     trend_momentum_score: int,
     feasibility_component: int,
+    gap_component: int,
     saturation_penalty: int,
     final_score: int,
 ) -> str:
@@ -208,7 +219,7 @@ def build_scoring_reasoning(
         f"{trend.get('name', 'This trend')} scores {final_score}/100 for POP. "
         f"Trend strength contributes {trend_strength_score}, timing momentum contributes {trend_momentum_score}, "
         f"feasibility contributes {feasibility_component}, and portfolio-fit opportunity contributes "
-        f"{trend.get('gap_opportunity_score', 0)}. "
+        f"{gap_component} from a {trend.get('gap_opportunity_score', 0)}/100 gap score. "
         f"A penalty of {saturation_penalty} is applied because the trend is {timing_stage}-stage "
         f"with {pop_presence} POP presence and {str(trend.get('time_to_market_risk', 'Medium')).lower()} "
         f"time-to-market risk. {adjacency_line} The best move is to {recommended_action}."
@@ -225,14 +236,14 @@ def score_trend(trend: Dict) -> Dict:
     trend_strength_score = calculate_trend_strength_score(trend)
     trend_momentum_score = calculate_trend_momentum_score(trend)
     feasibility_component = calculate_feasibility_component(trend)
-    gap_opportunity_score = _clamp(float(trend.get("gap_opportunity_score", 0)), 0, 25)
+    gap_component = calculate_gap_component(trend)
     saturation_penalty = calculate_saturation_penalty(trend)
 
     base_score = (
         trend_strength_score
         + trend_momentum_score
         + feasibility_component
-        + gap_opportunity_score
+        + gap_component
     )
     final_score = _clamp(base_score - saturation_penalty, 0, 100)
 
@@ -244,6 +255,7 @@ def score_trend(trend: Dict) -> Dict:
         "trend_strength_score": trend_strength_score,
         "trend_momentum_score": trend_momentum_score,
         "feasibility_component": feasibility_component,
+        "gap_component_score": gap_component,
         "saturation_penalty": saturation_penalty,
         "final_score": final_score,
         "opportunity_level": opportunity_level,
@@ -252,6 +264,7 @@ def score_trend(trend: Dict) -> Dict:
             trend_strength_score=trend_strength_score,
             trend_momentum_score=trend_momentum_score,
             feasibility_component=feasibility_component,
+            gap_component=gap_component,
             saturation_penalty=saturation_penalty,
             final_score=final_score,
         ),
@@ -291,6 +304,7 @@ def score_sample_trends(pop_products: Sequence[Dict] | None = None) -> List[Dict
 __all__ = [
     "build_scoring_reasoning",
     "calculate_feasibility_component",
+    "calculate_gap_component",
     "calculate_saturation_penalty",
     "calculate_trend_momentum_score",
     "calculate_trend_strength_score",
